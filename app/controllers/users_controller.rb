@@ -20,7 +20,9 @@ skip_before_action :authorized, only: [:index, :create, :login]
     @user = User.find_by(username: params[:user][:username])
 
     if @user && @user.authenticate(params[:user][:password])
-      @token = JWT.encode({user_id: @user.id}, Rails.application.secrets.secret_key_base[0])
+      payload = {user_id: @user.id}
+      secret = ENV['SECRET_KEY_BASE'] || Rails.application.secrets.secret_key_base[0]
+      @token = JWT.encode(payload, secret)
 
       render json: {user: @user, token: @token}, include: :crafts
     else
